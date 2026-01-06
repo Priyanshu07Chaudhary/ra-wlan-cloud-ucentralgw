@@ -44,7 +44,11 @@ namespace OpenWifi {
 		std::string SerialNumber = GetBinding(RESTAPI::Protocol::SERIALNUMBER, "");
 
 		if(!RESTAPI_utils::IsRootOrAdmin(UserInfo_.userinfo)) {
-			return UnAuthorized(RESTAPI::Errors::ACCESS_DENIED);
+			if(UserInfo_.userinfo.userRole != SecurityObjects::SUBSCRIBER) {
+				Logger().error(fmt::format("Delete request denied for user: [{}]", UserInfo_.userinfo.id));
+				return UnAuthorized(RESTAPI::Errors::ACCESS_DENIED);
+			}
+			Logger().information(fmt::format("Delete request came for device: [{}] of subscriber: [{}]", SerialNumber, UserInfo_.userinfo.id));
 		}
 
 		if (!Utils::NormalizeMac(SerialNumber)) {
@@ -85,6 +89,7 @@ namespace OpenWifi {
 			if(AP_WS_Server()->Connected(Utils::SerialNumberToInt(SerialNumber))) {
 				AP_WS_Server()->Disconnect(Utils::SerialNumberToInt(SerialNumber));
 			}
+			Logger().information(fmt::format("Successfully deleted device: [{}] of subscriber: [{}]", SerialNumber, UserInfo_.userinfo.id));
 			return OK();
 		}
 
