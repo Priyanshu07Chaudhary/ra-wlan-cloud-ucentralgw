@@ -48,6 +48,14 @@ namespace OpenWifi {
 				Logger().error(fmt::format("Delete request denied for user: [{}]", UserInfo_.userinfo.id));
 				return UnAuthorized(RESTAPI::Errors::ACCESS_DENIED);
 			}
+			GWObjects::Device device;
+			if (!StorageService()->GetDevice(SerialNumber, device)){
+				Logger().error(fmt::format("No device found with serialnumber: [{}]", SerialNumber));
+				return NotFound();
+			} else if (device.subscriber != UserInfo_.userinfo.id){
+				Logger().error(fmt::format("Delete request of device: [{}] denied for subscriber: [{}]", SerialNumber, UserInfo_.userinfo.id));
+				return UnAuthorized(RESTAPI::Errors::ACCESS_DENIED);
+			}
 			Logger().information(fmt::format("Delete request came for device: [{}] of subscriber: [{}]", SerialNumber, UserInfo_.userinfo.id));
 		}
 
