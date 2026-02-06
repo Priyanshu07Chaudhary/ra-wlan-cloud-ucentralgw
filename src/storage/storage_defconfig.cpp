@@ -63,17 +63,15 @@ namespace OpenWifi {
 			Poco::Data::Session Sess = Pool_->get();
 			Poco::Data::Statement Select(Sess);
 
-			std::string St{"SELECT name FROM DefaultConfigs WHERE Name=?"};
-			Select << ConvertParams(St), Poco::Data::Keywords::into(TmpName),
+			std::string SelectSt{"SELECT name FROM DefaultConfigs WHERE Name=?"};
+			Select << ConvertParams(SelectSt), Poco::Data::Keywords::into(TmpName),
 				Poco::Data::Keywords::use(Name);
 			Select.execute();
 
-			if (!TmpName.empty())
+			if (!TmpName.empty()) {
 				return false;
+			}
 
-			Config::Config Cfg(DefConfig.configuration);
-
-			if (Cfg.Valid()) {
 				Sess.begin();
 				Poco::Data::Statement Insert(Sess);
 
@@ -88,10 +86,6 @@ namespace OpenWifi {
 				Insert.execute();
 				Sess.commit();
 				return true;
-			} else {
-				poco_warning(Logger(), "Cannot create device: invalid configuration.");
-				return false;
-			}
 		} catch (const Poco::Exception &E) {
 			poco_warning(Logger(), fmt::format("{}: Failed with: {}", std::string(__func__),
 											   E.displayText()));
