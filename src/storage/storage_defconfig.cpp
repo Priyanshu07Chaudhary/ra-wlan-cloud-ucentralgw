@@ -63,22 +63,21 @@ namespace OpenWifi {
 			Poco::Data::Session Sess = Pool_->get();
 			Poco::Data::Statement Select(Sess);
 
-			std::string SelectSt{"SELECT name FROM DefaultConfigs WHERE Name=?"};
-			Select << ConvertParams(SelectSt), Poco::Data::Keywords::into(TmpName),
+			std::string St{"SELECT name FROM DefaultConfigs WHERE Name=?"};
+			Select << ConvertParams(St), Poco::Data::Keywords::into(TmpName),
 				Poco::Data::Keywords::use(Name);
 			Select.execute();
 
-			if (!TmpName.empty()) {
+			if (!TmpName.empty())
 				return false;
-			}
 
 				Sess.begin();
 				Poco::Data::Statement Insert(Sess);
 
-				std::string St{"INSERT INTO DefaultConfigs ( " + DB_DefConfig_SelectFields +
+				St = "INSERT INTO DefaultConfigs ( " + DB_DefConfig_SelectFields +
 							   " ) "
 							   "VALUES(" +
-							   DB_DefConfig_InsertValues + ")"};
+							   DB_DefConfig_InsertValues + ")";
 
 				DefConfigRecordTuple R;
 				Convert(DefConfig, R);
